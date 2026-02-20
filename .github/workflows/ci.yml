@@ -65,21 +65,26 @@ jobs:
         run: npm ci
         working-directory: ./frontend
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install backend dependencies
-        run: npm ci
+        run: bun install
         working-directory: ./backend
 
       - name: Run DB migrations
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/carrental
-        run: npx prisma migrate deploy
+        run: bunx prisma migrate deploy
 
       - name: Seed database
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/carrental
-        run: npx tsx prisma/seed.ts
+        run: bun run prisma/seed.ts
 
       - name: Start backend
         working-directory: ./backend
@@ -87,7 +92,10 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/carrental
           JWT_SECRET: ci-test-secret
           PORT: 3000
-        run: npm run dev &
+        run: bun run src/index.ts &
+
+      - name: Wait for backend to be ready
+        run: npx wait-on http://localhost:3000/api/health --timeout 30000
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps

@@ -14,9 +14,15 @@ import { adminRoutes } from "./modules/admin/admin.routes";
 const app = new Elysia()
   .use(
     cors({
-      origin: ["http://localhost:5173", "http://localhost:3000"],
+      origin: [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+        "https://car-rental-roan-kappa.vercel.app",
+        process.env.FRONTEND_URL || "",
+      ].filter(Boolean),
       credentials: true,
-    })
+    }),
   )
   .use(
     swagger({
@@ -34,13 +40,13 @@ const app = new Elysia()
           { name: "Admin", description: "Admin dashboard & analytics" },
         ],
       },
-    })
+    }),
   )
   .use(
     jwt({
       name: "jwt",
       secret: process.env.JWT_SECRET || "car-rental-jwt-secret-key-2024",
-    })
+    }),
   )
   .use(cookie())
   .use(authRoutes)
@@ -48,10 +54,16 @@ const app = new Elysia()
   .use(reservationsRoutes)
   .use(paymentsRoutes)
   .use(adminRoutes)
-  .get("/api/health", () => ({ status: "ok", timestamp: new Date().toISOString() }), {
-    detail: { tags: ["Health"], summary: "Health check" },
-  })
+  .get(
+    "/api/health",
+    () => ({ status: "ok", timestamp: new Date().toISOString() }),
+    {
+      detail: { tags: ["Health"], summary: "Health check" },
+    },
+  )
   .listen(3000);
 
-console.log(`🚗 Car Rental API running at http://localhost:${app.server?.port}`);
+console.log(
+  `🚗 Car Rental API running at http://localhost:${app.server?.port}`,
+);
 console.log(`📚 Swagger docs at http://localhost:${app.server?.port}/swagger`);
