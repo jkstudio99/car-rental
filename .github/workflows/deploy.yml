@@ -38,17 +38,14 @@ jobs:
           working-directory: ./frontend
 
   deploy-backend:
-    name: Deploy Backend to Railway
+    name: Deploy Backend to Render
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy to Railway
-        working-directory: ./backend
+      - name: Trigger Render Deploy
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service car-rental-api --detach
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          curl $RENDER_DEPLOY_HOOK
