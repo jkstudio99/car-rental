@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum EmployeeRole {
+  ADMIN
+  STAFF
+}
+
+enum VehicleCategory {
+  SEDAN
+  SUV
+  VAN
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PayMethod {
+  PROMPTPAY
+  CREDIT_CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model Employee {
+  id        String       @id @default(uuid())
+  firstName String       @map("first_name")
+  lastName  String       @map("last_name")
+  phone     String
+  email     String       @unique
+  password  String
+  role      EmployeeRole @default(STAFF)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  approvedReservations Reservation[] @relation("ApprovedBy")
+
+  @@map("employees")
+}
+
+model Customer {
+  id             String   @id @default(uuid())
+  firstName      String   @map("first_name")
+  lastName       String   @map("last_name")
+  phone          String
+  email          String   @unique
+  password       String
+  drivingLicense String   @unique @map("driving_license")
+  addressText    String?  @map("address_text")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  reservations Reservation[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id         String          @id @default(uuid())
+  plateNo    String          @unique @map("plate_no")
+  brand      String
+  model      String
+  category   VehicleCategory
+  dailyPrice Float           @map("daily_price")
+  imageUrl   String?         @map("image_url")
+  status     VehicleStatus   @default(AVAILABLE)
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+
+  reservations Reservation[]
+
+  @@map("vehicles")
+}
+
+model Reservation {
+  id                   String            @id @default(uuid())
+  customerId           String            @map("customer_id")
+  vehicleId            String            @map("vehicle_id")
+  approvedById         String?           @map("approved_by")
+  reserveDate          DateTime          @default(now()) @map("reserve_date")
+  pickupDate           DateTime          @map("pickup_date")
+  returnDate           DateTime          @map("return_date")
+  pickupLocation       String            @map("pickup_location")
+  status               ReservationStatus @default(PENDING)
+  totalCalculatedPrice Float             @map("total_calculated_price")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  vehicle       Vehicle        @relation(fields: [vehicleId], references: [id])
+  approvedBy    Employee?      @relation("ApprovedBy", fields: [approvedById], references: [id])
+  paymentRecord PaymentRecord?
+
+  @@index([vehicleId, status, pickupDate, returnDate], name: "idx_vehicle_availability")
+  @@map("reservations")
+}
+
+model PaymentRecord {
+  id             String        @id @default(uuid())
+  reservationId  String        @unique @map("reservation_id")
+  payMethod      PayMethod     @map("pay_method")
+  downPayment    Float         @default(0) @map("down_payment")
+  finalPayment   Float         @default(0) @map("final_payment")
+  lateFeePenalty Float         @default(0) @map("late_fee_penalty")
+  damageFee      Float         @default(0) @map("damage_fee")
+  refundAmount   Float         @default(0) @map("refund_amount")
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?     @map("paid_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+
+  @@map("payment_records")
+}
