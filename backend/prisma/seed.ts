@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
+import { createHash } from "crypto";
 
 const pool = new pg.Pool({
   connectionString:
@@ -27,7 +28,7 @@ async function main() {
       lastName: "Jaidee",
       phone: "081-234-5678",
       email: "admin@carrental.com",
-      password: await Bun.password.hash("admin123"),
+      password: createHash("sha256").update("admin123").digest("hex"),
       role: "ADMIN",
     },
   });
