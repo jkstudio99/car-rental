@@ -6,7 +6,7 @@
 | --------------------- | ----------------------------------------- |
 | **Frontend (Vercel)** | https://car-rental-roan-kappa.vercel.app  |
 | **Storybook**         | Build locally: `npm run storybook`        |
-| **Backend (Railway)** | https://car-rental-backend.up.railway.app |
+| **Backend (Railway)** | https://car-rental-production-4c90.up.railway.app |
 
 ## Frontend — Vercel
 
@@ -37,7 +37,7 @@ vercel --prod
    - **Output Directory**: `dist`
 5. เพิ่ม Environment Variables:
    ```
-   VITE_API_URL=https://car-rental-backend.up.railway.app
+   VITE_API_URL=https://car-rental-production-4c90.up.railway.app
    ```
 6. กด **Deploy**
 
@@ -101,7 +101,7 @@ Railway จะ auto-deploy ทุกครั้งที่ push ไป `main` 
 ### ได้ URL ของ backend
 
 ไปที่ backend service → **Settings** → **Networking** → **Generate Domain**
-จะได้ URL เช่น `https://car-rental-backend.up.railway.app`
+จะได้ URL เช่น `https://car-rental-production-4c90.up.railway.app`
 
 ---
 
@@ -115,7 +115,7 @@ Railway จะ auto-deploy ทุกครั้งที่ push ไป `main` 
 | --------------- | ---------------------------------------------------------------------------------- |
 | `VERCEL_TOKEN`  | [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create Token**  |
 | `RAILWAY_TOKEN` | [railway.app](https://railway.app) → Account Settings → **Tokens** → Create token |
-| `VITE_API_URL`  | URL ของ backend บน Railway เช่น `https://car-rental-backend.up.railway.app`        |
+| `VITE_API_URL`  | URL ของ backend บน Railway เช่น `https://car-rental-production-4c90.up.railway.app`        |
 
 ### Workflows
 
