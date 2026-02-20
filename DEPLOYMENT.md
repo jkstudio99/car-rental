@@ -6,7 +6,7 @@
 | --------------------- | ---------------------------------------- |
 | **Frontend (Vercel)** | https://car-rental-roan-kappa.vercel.app |
 | **Storybook**         | Build locally: `npm run storybook`       |
-| **Backend**           | Deploy via Fly.io (see below)            |
+| **Backend**           | Deploy via Railway (see below)           |
 
 ## Frontend — Vercel
 
@@ -49,81 +49,67 @@ vercel --prod
 
 ---
 
-## Backend (Elysia/Bun) — Fly.io
+## Backend (Elysia/Bun) — Railway
 
-### ติดตั้ง flyctl
+Railway ไม่บังคับบัตรเครดิต มี free tier $5/เดือน เหมาะสำหรับ project นี้
+
+### Deploy ครั้งแรก (UI)
+
+1. ไปที่ **[railway.app](https://railway.app)** → Login ด้วย GitHub
+2. กด **New Project** → **Deploy from GitHub repo**
+3. เลือก repo `car-rental` → เลือก folder **`backend`**
+4. Railway จะ detect Dockerfile อัตโนมัติ
+5. กด **Add Service** → **Database** → **PostgreSQL**
+6. ไปที่ backend service → **Variables** → เพิ่ม:
+   ```
+   DATABASE_URL=${{Postgres.DATABASE_URL}}
+   JWT_SECRET=your-super-secret-key-here
+   FRONTEND_URL=https://car-rental-roan-kappa.vercel.app
+   NODE_ENV=production
+   PORT=3000
+   ```
+7. กด **Deploy**
+
+### Run migrations หลัง deploy ครั้งแรก
 
 ```bash
-# macOS
-brew install flyctl
-
-# หรือ
-curl -L https://fly.io/install.sh | sh
-```
-
-### Deploy ครั้งแรก
-
-```bash
-cd backend
+# ติดตั้ง Railway CLI
+npm install -g @railway/cli
 
 # Login
-flyctl auth login
+railway login
 
-# สร้าง app (ครั้งแรกเท่านั้น)
-flyctl launch --name car-rental-api --region sin --no-deploy
+# เชื่อม project
+railway link
 
-# สร้าง PostgreSQL database
-flyctl postgres create --name car-rental-db --region sin
+# รัน migration
+railway run --service car-rental-api bunx prisma migrate deploy
 
-# Attach database กับ app
-flyctl postgres attach car-rental-db --app car-rental-api
-
-# ตั้งค่า secrets
-flyctl secrets set JWT_SECRET=your-super-secret-key-here
-flyctl secrets set NODE_ENV=production
-
-# Deploy
-flyctl deploy
+# Seed database (optional)
+railway run --service car-rental-api bun run prisma/seed.ts
 ```
 
-### Deploy ครั้งต่อไป
+### Deploy ครั้งต่อไป (อัตโนมัติ)
+
+Railway จะ auto-deploy ทุกครั้งที่ push ไป `main` โดยอัตโนมัติ (ถ้าเชื่อม GitHub แล้ว)
+
+หรือ deploy ด้วย CLI:
 
 ```bash
 cd backend
-flyctl deploy
-```
-
-### Run migrations บน production
-
-```bash
-flyctl ssh console --app car-rental-api
-# ใน console:
-bunx prisma migrate deploy
+railway up --service car-rental-api
 ```
 
 ### ดู logs
 
 ```bash
-flyctl logs --app car-rental-api
+railway logs --service car-rental-api
 ```
 
----
+### ได้ URL ของ backend
 
-## Backend — Railway (ทางเลือก)
-
-Railway ง่ายกว่า Fly.io เหมาะสำหรับ prototype:
-
-1. ไปที่ [railway.app](https://railway.app)
-2. **New Project** → **Deploy from GitHub repo**
-3. เลือก folder `backend`
-4. เพิ่ม **PostgreSQL** plugin
-5. ตั้งค่า Environment Variables:
-   ```
-   DATABASE_URL=${{Postgres.DATABASE_URL}}
-   JWT_SECRET=your-secret
-   PORT=3000
-   ```
-6. ตั้งค่า **Start Command**: `bun run src/index.ts`
+ไปที่ Railway dashboard → backend service → **Settings** → **Networking** → **Generate Domain**
+จะได้ URL เช่น `https://car-rental-api-production.up.railway.app`
 
 ---
 
@@ -133,20 +119,18 @@ Railway ง่ายกว่า Fly.io เหมาะสำหรับ protot
 
 ไปที่ **Settings → Secrets and variables → Actions** แล้วเพิ่ม:
 
-| Secret              | วิธีได้มา                                                      |
-| ------------------- | -------------------------------------------------------------- |
-| `VERCEL_TOKEN`      | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID`     | รัน `vercel whoami` หรือดูใน `.vercel/project.json`            |
-| `VERCEL_PROJECT_ID` | รัน `vercel link` แล้วดูใน `.vercel/project.json`              |
-| `FLY_API_TOKEN`     | รัน `flyctl auth token`                                        |
-| `VITE_API_URL`      | URL ของ backend เช่น `https://car-rental-api.fly.dev`          |
+| Secret          | วิธีได้มา                                                                          |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`  | [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create Token**  |
+| `RAILWAY_TOKEN` | [railway.app](https://railway.app) → Account → **API Tokens** → **Create Token**   |
+| `VITE_API_URL`  | URL ของ backend บน Railway เช่น `https://car-rental-api-production.up.railway.app` |
 
 ### Workflows
 
 | Workflow     | Trigger            | หน้าที่                                        |
 | ------------ | ------------------ | ---------------------------------------------- |
 | `ci.yml`     | Push/PR ทุก branch | Lint, Build, Playwright tests, Storybook build |
-| `deploy.yml` | Push ไป `main`     | Deploy frontend → Vercel, backend → Fly.io     |
+| `deploy.yml` | Push ไป `main`     | Deploy frontend → Vercel, backend → Railway    |
 
 ### Flow
 

@@ -38,17 +38,17 @@ jobs:
           working-directory: ./frontend
 
   deploy-backend:
-    name: Deploy Backend to Fly.io
+    name: Deploy Backend to Railway
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Fly CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
 
-      - name: Deploy to Fly.io
+      - name: Deploy to Railway
         working-directory: ./backend
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: flyctl deploy --remote-only
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service car-rental-api --detach
