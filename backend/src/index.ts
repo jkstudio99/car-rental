@@ -61,7 +61,7 @@ const app = new Elysia()
       detail: { tags: ["Health"], summary: "Health check" },
     },
   )
-  .listen(3000);
+  .listen(Number(process.env.PORT) || 3000);
 
 console.log(
   `🚗 Car Rental API running at http://localhost:${app.server?.port}`,
