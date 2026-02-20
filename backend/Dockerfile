@@ -17,6 +17,10 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/prisma.config.ts ./
 
+# Run migrations and seed data on startup
+RUN bunx prisma migrate deploy
+RUN bun run prisma/seed.ts
+
 EXPOSE 3000
 
 CMD ["bun", "run", "src/index.ts"]
