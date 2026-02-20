@@ -6,7 +6,7 @@
 | --------------------- | ---------------------------------------- |
 | **Frontend (Vercel)** | https://car-rental-roan-kappa.vercel.app |
 | **Storybook**         | Build locally: `npm run storybook`       |
-| **Backend**           | Deploy via Railway (see below)           |
+| **Backend (Render)**  | https://car-rental-wwba.onrender.com     |
 
 ## Frontend — Vercel
 
@@ -111,7 +111,7 @@ Render จะ auto-deploy ทุกครั้งที่ push ไป `main` �
 ### ได้ URL ของ backend
 
 ไปที่ backend service → ดูบนสุดของหน้า
-จะได้ URL เช่น `https://car-rental-api.onrender.com`
+จะได้ URL เช่น `https://car-rental-wwba.onrender.com`
 
 ---
 
@@ -125,7 +125,7 @@ Render จะ auto-deploy ทุกครั้งที่ push ไป `main` �
 | -------------------- | --------------------------------------------------------------------------------- |
 | `VERCEL_TOKEN`       | [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create Token** |
 | `RENDER_DEPLOY_HOOK` | Render dashboard → backend service → **Settings** → **Deploy Hook** → Copy URL    |
-| `VITE_API_URL`       | URL ของ backend บน Render เช่น `https://car-rental-api.onrender.com`              |
+| `VITE_API_URL`       | URL ของ backend บน Render: `https://car-rental-wwba.onrender.com`                 |
 
 ### Workflows
 
